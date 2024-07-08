@@ -15,14 +15,14 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         User::factory()->create([
-            'name' => 'superadmin',
-            'email' => 'superadmin@admin.com',
-            'no_hp' => '081111111112',
+            'name' => 'superadmin2',
+            'email' => 'superadmin2@admin.com',
+            'no_hp' => '081111111113',
             'jenis_kelamin' => 'PRIA',
             'alamat' => 'bantul',
             'is_admin' => 'YES',
             'foto' => 'mbjsnvlksvbsdkvnlskvnsvn',
-            'password' => Hash::make('19091991'),
+            'password' => Hash::make('123456789'),
         ]);
     }
 }

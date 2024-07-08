@@ -37,11 +37,15 @@ Route::delete('product/{id}', [ProductController::class, 'destroy'])->name('admi
 Route::middleware(['auth'])->resource('/customer', CustomerController::class);
 //Route::middleware(['auth'])->resource('/checkout', CheckOutController::class);
 Route::controller(CustomerController::class)->middleware(['auth'])->group(function () {
+    Route::get('/customer-profile', 'index')->name('customer.profile');
+    Route::post('/customer-update', 'update')->name('customer.update');
+    Route::post('/customer-update-password', 'change_password')->name('customer.change_password');
     Route::get('confirmation/{id}', 'confirmation')->name('customer.confirmation');
     Route::get('/cart', 'cart')->name('customer.cart');
     Route::get('/payment', 'paymentList')->name('customer.payment');
     Route::post('/checkout', 'checkout')->name('customer.checkout');
-    Route::post('/pay', 'pay')->name('customer.pay');
+    // Route::post('/pay', 'pay')->name('customer.pay');
+    // Route::post('/midtrans-callback', 'callback')->name('callback');
 });
 
 

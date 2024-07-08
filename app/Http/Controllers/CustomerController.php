@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
@@ -15,6 +18,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
+        return view('customer.profile');
     }
 
     /**
@@ -48,16 +52,52 @@ class CustomerController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $data = Auth::user();
+        return view('customer.profile');
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //
+        $user = User::find(auth()->user()->id);
+        $data = $request->validate([
+            'name' => 'required',
+            'no_hp' => 'required',
+            'alamat' => 'required',
+            'jenis_kelamin' => 'required',
+        ]);
+        if ($request->file('foto')) {
+            if ($request->oldFoto) {
+                Storage::delete($request->oldFoto);
+            }
+            $data['foto'] = $request->file('foto')->store('customer');
+        }
+
+        $user->update($data);
+        toastr()->success('Data Profil Anda Berhasil Diperbarui');
+        return back();
     }
+
+    public function change_password(Request $request)
+    {
+        $data = $request->validate([
+            'oldPassword' => 'required',
+            'password' => 'required|confirmed'
+        ]);
+        if (Hash::check($request->oldPassword, auth()->user()->password)) {
+            $user = User::find(auth()->user()->id);
+            $user->update([
+                'password' => Hash::make($request->password)
+            ]);
+            toastr()->success('Password Anda Berhasil Diubah');
+        } else {
+            toastr()->error('Password Lama Salah');
+        }
+        return back();
+    }
+
 
     public function cart()
     {
@@ -146,15 +186,16 @@ class CustomerController extends Controller
     {
         $transactions = Transaction::where('user_id', '=', Auth::user()->id)
             ->latest()
-            ->paginate(2);
+            ->paginate(5);
 
         return view('customer.payment', compact('transactions'));
     }
 
     public function pay(Request $request)
     {
-        $serveKey = config('midtrans.server_key');
-        $hash = hash("sha512", $request->transaction_id . $request->status_code . $request->gross_amount . $serveKey);
+
+        $serverKey = config('midtrans.server_key');
+        $hash = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
         if ($hash == $request->signature_key) {
             if ($request->transaction_status == 'capture') {
                 $transaction = Transaction::find($request->order_id);
@@ -162,6 +203,7 @@ class CustomerController extends Controller
             }
         }
     }
+
 
     /**
      * Remove the specified resource from storage.
