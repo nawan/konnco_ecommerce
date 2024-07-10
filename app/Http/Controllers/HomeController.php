@@ -31,7 +31,7 @@ class HomeController extends Controller
         $search = $request->search;
         $products = Product::where('status', '=', 'ACTIVE')
             ->latest()
-            ->paginate(4);
+            ->paginate(8);
         // $cart = Transaction::where('user_id', '=', auth()->user()->id)
         //     ->get();
         // $myCart = $cart->count();

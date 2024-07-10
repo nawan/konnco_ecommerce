@@ -37,6 +37,12 @@
     <link href="{{ asset('img/cart_logo.png') }}" rel="icon" type="image/png">
 </head>
 <body id="page-top">
+@php
+    $user_id = auth()->user()->id;
+    $transaction_notif = App\Models\Transaction::where('user_id', '=', $user_id)
+    ->where('status', '=', 'UNPAID')
+    ->count();
+@endphp
 
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -67,10 +73,24 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('customer.payment') }}" class="nav-link">
-                <i class="fa fa-cash-register"></i>
-                Pembayaran
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCart"
+                aria-expanded="true" aria-controls="collapseCart">
+                <i class="fa fa-cart-shopping"></i>
+                Keranjang
+                @if($transaction_notif > 0)
+                <span class="fw-bold text-danger">*</span>
+                @endif
             </a>
+            <div id="collapseCart" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="{{ route('customer.payment') }}">Pembayaran
+                        @if($transaction_notif > 0)
+                        <span class="badge badge-danger badge-counter align-top">{{ $transaction_notif }}</span>
+                        @endif
+                    </a>
+                    <a class="collapse-item" href="{{ route('customer.history') }}">Riwayat</a>
+                </div>
+            </div>
         </li>
 
         <!-- Divider -->
@@ -175,7 +195,7 @@
         <div class="card-group bg-light mt-10">
             <div class="card-body text-center col-md-6">
                 <div class="card-body bg-white p-5" style="width:100%;max-heigth:600px">
-                    <img src="{{ asset('storage/' . $product->foto) }}" class="rounded img-thumbnail" width="500" data-bs-toggle="modal" data-bs-target="#detail-foto" style="cursor: pointer">
+                    <img src="{{ asset('storage/' . $transaction->product->foto) }}" class="rounded img-thumbnail" width="500" data-bs-toggle="modal" data-bs-target="#detail-foto" style="cursor: pointer">
                 </div>
             </div>
     
@@ -183,7 +203,7 @@
             <div class="card-body col-md-6">
                 <div class="card-body text-left bg-white p-3" style="width:100%;max-heigth:600px">
                     <p class="card-text fw-bold m-0">Nama</p>
-                    <p class="fst-italic text-capitalize mb-2">{{ $product->nama }}</p>
+                    <p class="fst-italic text-capitalize mb-2">{{ $transaction->product->nama }}</p>
 
                     <button id="pay-button" class="btn btn-success fw-bold">BAYAR</button>
                 </div>
@@ -193,7 +213,7 @@
                     Deskripsi
                 </div>
                 <div class="card-body bg-white p-3" style="width:100%; max-heigth:500px">
-                    <p class="fst-italic text-capitalize mb-2">{!! html_entity_decode($product->deskripsi, ENT_QUOTES, 'UTF-8' ) !!}</p>
+                    <p class="fst-italic text-capitalize mb-2">{!! html_entity_decode($transaction->product->deskripsi, ENT_QUOTES, 'UTF-8' ) !!}</p>
                 </div>
             </div>
         </div>

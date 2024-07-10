@@ -33,6 +33,12 @@
     <link href="{{ asset('img/cart_logo.png') }}" rel="icon" type="image/png">
 </head>
 <body id="page-top">
+    @php
+        $user_id = auth()->user()->id;
+        $transaction = App\Models\Transaction::where('user_id', '=', $user_id)
+        ->where('status', '=', 'UNPAID')
+        ->count();
+    @endphp
 
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -59,14 +65,28 @@
         <li class="nav-item">
             <a href="{{ route('home') }}" class="nav-link">
                 <i class="fa fa-shop me-1"></i>
-                Belanja
+                Beranda
             </a>
         </li>
         <li class="nav-item">
-            <a href="{{ route('customer.payment') }}" class="nav-link">
-                <i class="fa fa-cash-register"></i>
-                Pembayaran
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCart"
+                aria-expanded="true" aria-controls="collapseCart">
+                <i class="fa fa-cart-shopping"></i>
+                Keranjang
+                @if($transaction > 0)
+                <span class="fw-bold text-danger">*</span>
+                @endif
             </a>
+            <div id="collapseCart" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="{{ route('customer.payment') }}">Pembayaran
+                        @if($transaction > 0)
+                        <span class="badge badge-danger badge-counter align-top">{{ $transaction }}</span>
+                        @endif
+                    </a>
+                    <a class="collapse-item" href="{{ route('customer.history') }}">Riwayat</a>
+                </div>
+            </div>
         </li>
 
         <!-- Divider -->

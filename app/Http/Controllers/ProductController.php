@@ -24,14 +24,14 @@ class ProductController extends Controller
         $search = $request->search;
         $products = Product::where('nama', 'like', '%' . $search . '%')
             ->latest()
-            ->paginate(5);
+            ->paginate(10);
 
         return view('product.index', compact('products'));
     }
 
     public function transaction()
     {
-        $transactions = Transaction::latest()->paginate(5);
+        $transactions = Transaction::latest()->paginate(10);
 
         return view('admin.transaction', compact('transactions'));
     }

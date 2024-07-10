@@ -40,10 +40,12 @@ Route::controller(CustomerController::class)->middleware(['auth'])->group(functi
     Route::get('/customer-profile', 'index')->name('customer.profile');
     Route::post('/customer-update', 'update')->name('customer.update');
     Route::post('/customer-update-password', 'change_password')->name('customer.change_password');
-    Route::get('confirmation/{id}', 'confirmation')->name('customer.confirmation');
-    Route::get('/cart', 'cart')->name('customer.cart');
     Route::get('/payment', 'paymentList')->name('customer.payment');
+    Route::get('/history', 'history')->name('customer.history');
     Route::post('/checkout', 'checkout')->name('customer.checkout');
+    Route::get('confirmation/{id}', 'confirmation')->name('customer.confirmation');
+    Route::get('pay/{id}', 'paymentConfirmation')->name('customer.paymentConfirmation');
+    //Route::delete('delete', 'destroy')->name('customer.destroy');
     // Route::post('/pay', 'pay')->name('customer.pay');
     // Route::post('/midtrans-callback', 'callback')->name('callback');
 });

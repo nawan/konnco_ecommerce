@@ -98,12 +98,6 @@ class CustomerController extends Controller
         return back();
     }
 
-
-    public function cart()
-    {
-        return view('customer.cart');
-    }
-
     public function confirmation(string $id)
     {
 
@@ -150,6 +144,44 @@ class CustomerController extends Controller
             $transaction = Transaction::create($data);
         }
 
+        $encryptID = Crypt::encrypt($transaction->id);
+
+
+        // // Set your Merchant Server Key
+        // \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        // // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
+        // \Midtrans\Config::$isProduction = false;
+        // // Set sanitization on (default)
+        // \Midtrans\Config::$isSanitized = true;
+        // // Set 3DS transaction for credit card to true
+        // \Midtrans\Config::$is3ds = true;
+
+        // $params = array(
+        //     'transaction_details' => array(
+        //         'order_id' => $transaction->id,
+        //         'gross_amount' => $transaction->total_harga,
+        //     ),
+        //     'customer_details' => array(
+        //         'name' => Auth::user()->name,
+        //         'email' => Auth::user()->email,
+        //         'phone' => Auth::user()->no_hp,
+        //         'alamat' => Auth::user()->alamat,
+        //     ),
+        // );
+
+        // $snapToken = \Midtrans\Snap::getSnapToken($params);
+        //dd($snapToken);
+        toastr()->success('Produk Berhasil Dilakukan Checkout');
+        // return redirect()->back()->with(compact('snapToken'));
+        return redirect()->route('customer.paymentConfirmation', $encryptID);
+
+        //return view('customer.checkout', compact('product', 'snapToken'));
+    }
+
+    public function paymentConfirmation(String $id)
+    {
+        $decryptID = Crypt::decrypt($id);
+        $transaction = Transaction::find($decryptID);
 
         // Set your Merchant Server Key
         \Midtrans\Config::$serverKey = config('midtrans.server_key');
@@ -174,17 +206,15 @@ class CustomerController extends Controller
         );
 
         $snapToken = \Midtrans\Snap::getSnapToken($params);
-        //dd($snapToken);
-        toastr()->success('Produk Berhasil Dilakukan Checkout');
-        // return redirect()->back()->with(compact('snapToken'));
 
-        return view('customer.checkout', compact('product', 'snapToken'));
+        return view('customer.checkout', compact('transaction', 'snapToken'));
     }
 
 
     public function paymentList()
     {
         $transactions = Transaction::where('user_id', '=', Auth::user()->id)
+            ->where('status', '=', 'UNPAID')
             ->latest()
             ->paginate(5);
 
@@ -204,12 +234,28 @@ class CustomerController extends Controller
         }
     }
 
+    public function history()
+    {
+        $transactions = Transaction::where('user_id', '=', Auth::user()->id)
+            ->latest()
+            ->paginate(5);
+
+        return view('customer.history', compact('transactions'));
+    }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $transaction = Transaction::find($id);
+        $product = Product::find($transaction->product_id);
+        $product->stock = $product->stock + $transaction->qty;
+        $product->save();
+
+        $transaction->delete();
+        toastr()->success('Data Pembayaran Berhasil Dihapus');
+        return back();
     }
 }
